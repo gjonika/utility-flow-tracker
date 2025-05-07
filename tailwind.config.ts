@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,13 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				utility: {
+					electricity: '#4361EE',
+					water: '#4CC9F0',
+					gas: '#F72585',
+					internet: '#7209B7',
+					DEFAULT: '#3A86FF'
 				}
 			},
 			borderRadius: {

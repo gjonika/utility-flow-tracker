@@ -1,73 +1,67 @@
-# Welcome to your Lovable project
 
-## Project info
+# Utility Flow Tracker
 
-**URL**: https://lovable.dev/projects/0a0d0b7d-7322-4fea-ae98-bcf8c6ed11b6
+A clean, simple dashboard application to track monthly utility usage, meter readings, and payments for personal use.
 
-## How can I edit this code?
+## Features
 
-There are several ways of editing your application.
+- Track multiple utility types (electricity, water, gas, internet, other)
+- Record meter readings and payment amounts
+- View historical data in a sortable table
+- Visualize trends with interactive charts
+- Offline-first design with localStorage fallback
+- Auto-sync when connection is restored
 
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/0a0d0b7d-7322-4fea-ae98-bcf8c6ed11b6) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
+## Technical Details
 
 This project is built with:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- React and TypeScript
+- Tailwind CSS for styling
+- Shadcn/UI component library
+- Recharts for data visualization
+- Zod for data validation
+- Supabase for data storage
+- Local storage for offline capabilities
 
-## How can I deploy this project?
+## Setup
 
-Simply open [Lovable](https://lovable.dev/projects/0a0d0b7d-7322-4fea-ae98-bcf8c6ed11b6) and click on Share -> Publish.
+1. Clone this repository
+2. Install dependencies with `npm install`
+3. Create a `.env` file with your Supabase credentials:
+   ```
+   VITE_SUPABASE_URL=your_supabase_url
+   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
+4. Run `npm run dev` to start the development server
 
-## Can I connect a custom domain to my Lovable project?
+## Supabase Setup
 
-Yes, you can!
+Create a table in your Supabase project called `utility_entries` with the following schema:
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+```sql
+create table utility_entries (
+  id uuid default uuid_generate_v4() primary key,
+  utility_type text not null,
+  supplier text not null,
+  reading_date date not null,
+  reading numeric null,
+  unit text null,
+  amount numeric not null,
+  notes text null,
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now()
+);
+```
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## Usage
+
+1. Add new utility entries using the "Add New Entry" button
+2. View your entries in the History tab
+3. Analyze trends in the charts
+4. Edit or delete entries as needed
+5. Works offline - data will sync when your connection is restored
+
+## License
+
+MIT
