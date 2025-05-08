@@ -13,7 +13,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { UtilityForm } from "@/components/UtilityForm";
 import { UtilityHistory } from "@/components/UtilityHistory";
 import { UtilityChart } from "@/components/UtilityChart";
-import { utilityService, setupNetworkListeners } from "@/lib/supabase";
+import { utilityService, setupUtilityNetworkListeners } from "@/lib/supabase";
 import { UtilityEntry } from "@/lib/types";
 import { toast } from "sonner";
 
@@ -27,7 +27,7 @@ const Index = () => {
 
   useEffect(() => {
     // Setup network listeners for offline/online handling
-    setupNetworkListeners();
+    setupUtilityNetworkListeners();
     
     // Load initial data
     loadEntries();
