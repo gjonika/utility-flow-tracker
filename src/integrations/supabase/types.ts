@@ -65,6 +65,69 @@ export type Database = {
         }
         Relationships: []
       }
+      utility_entries: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          notes: string | null
+          reading: number | null
+          readingdate: string
+          supplier: string
+          unit: string | null
+          updated_at: string
+          utilitytype: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          reading?: number | null
+          readingdate: string
+          supplier: string
+          unit?: string | null
+          updated_at?: string
+          utilitytype: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          reading?: number | null
+          readingdate?: string
+          supplier?: string
+          unit?: string | null
+          updated_at?: string
+          utilitytype?: string
+        }
+        Relationships: []
+      }
+      utility_suppliers: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          unit: string | null
+          utilitytype: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          unit?: string | null
+          utilitytype: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          unit?: string | null
+          utilitytype?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
