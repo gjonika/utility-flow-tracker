@@ -13,6 +13,39 @@ export const isOnline = (): boolean => {
   return navigator.onLine;
 };
 
+// Map our app model to Supabase schema
+const mapToSupabaseModel = (entry: UtilityEntry) => {
+  return {
+    id: entry.id,
+    utilitytype: entry.utilityType,
+    supplier: entry.supplier,
+    readingdate: entry.readingDate,
+    reading: entry.reading,
+    unit: entry.unit,
+    amount: entry.amount,
+    notes: entry.notes,
+    created_at: entry.createdAt,
+    updated_at: entry.updatedAt
+  };
+};
+
+// Map from Supabase model to our app model
+const mapFromSupabaseModel = (record: any): UtilityEntry => {
+  return {
+    id: record.id,
+    utilityType: record.utilitytype,
+    supplier: record.supplier,
+    readingDate: record.readingdate,
+    reading: record.reading,
+    unit: record.unit,
+    amount: record.amount,
+    notes: record.notes,
+    createdAt: record.created_at,
+    updatedAt: record.updated_at,
+    synced: true
+  };
+};
+
 // Utility data service
 export const utilityService = {
   // Get all entries from Supabase or localStorage
@@ -22,7 +55,7 @@ export const utilityService = {
         const { data, error } = await supabase
           .from('utility_entries')
           .select('*')
-          .order('readingDate', { ascending: false });
+          .order('readingdate', { ascending: false });
         
         if (error) {
           console.error('Error fetching entries from Supabase:', error);
@@ -30,9 +63,10 @@ export const utilityService = {
           return this.getLocalEntries();
         }
         
-        // Update local storage with fresh data
-        localStorage.setItem(UTILITY_ENTRIES_KEY, JSON.stringify(data));
-        return data as UtilityEntry[];
+        // Map data to our app model and update local storage
+        const mappedData = data.map(mapFromSupabaseModel);
+        localStorage.setItem(UTILITY_ENTRIES_KEY, JSON.stringify(mappedData));
+        return mappedData;
       } else {
         return this.getLocalEntries();
       }
@@ -64,10 +98,13 @@ export const utilityService = {
       };
       
       if (isOnline()) {
+        // Map to Supabase model before saving
+        const supabaseEntry = mapToSupabaseModel(entryToSave);
+        
         // Try to save to Supabase first
         const { data, error } = await supabase
           .from('utility_entries')
-          .upsert([entryToSave])
+          .upsert([supabaseEntry])
           .select()
           .single();
         
@@ -76,13 +113,16 @@ export const utilityService = {
           return this.saveLocalEntry({...entryToSave, synced: false});
         }
         
+        // Map back from Supabase model
+        const savedEntry = mapFromSupabaseModel(data);
+        
         // Update local cache
         const entries = this.getLocalEntries();
-        const updatedEntries = entries.filter(e => e.id !== data.id);
-        updatedEntries.push({...data, synced: true});
+        const updatedEntries = entries.filter(e => e.id !== savedEntry.id);
+        updatedEntries.push(savedEntry);
         localStorage.setItem(UTILITY_ENTRIES_KEY, JSON.stringify(updatedEntries));
         
-        return data as UtilityEntry;
+        return savedEntry;
       } else {
         // Offline mode
         return this.saveLocalEntry({...entryToSave, synced: false});
@@ -192,13 +232,19 @@ export const utilityService = {
         
         entryToSync.synced = true;
         
+        // Map to Supabase model
+        const supabaseEntry = mapToSupabaseModel(entryToSync);
+        
         const { data, error } = await supabase
           .from('utility_entries')
-          .upsert([entryToSync])
+          .upsert([supabaseEntry])
           .select()
           .single();
         
         if (!error) {
+          // Map from Supabase model
+          const syncedEntry = mapFromSupabaseModel(data);
+          
           // Remove from unsynced and update local entry
           const remaining = this.getUnsyncedEntries().filter(e => e.id !== entry.id);
           localStorage.setItem(UNSYNCED_ENTRIES_KEY, JSON.stringify(remaining));
@@ -206,7 +252,7 @@ export const utilityService = {
           // Update local entries
           const localEntries = this.getLocalEntries();
           const updatedEntries = localEntries.filter(e => e.id !== entry.id);
-          updatedEntries.push({...data, synced: true});
+          updatedEntries.push(syncedEntry);
           localStorage.setItem(UTILITY_ENTRIES_KEY, JSON.stringify(updatedEntries));
           
           syncedCount++;
