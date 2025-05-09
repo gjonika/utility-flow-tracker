@@ -1,3 +1,4 @@
+
 import { UtilityEntry } from "../types";
 import { parse } from "date-fns";
 
@@ -89,9 +90,9 @@ export const validateRow = (row: CSVRow, rowIndex: number): ValidatedEntry => {
       "electricity", "water", "gas", "internet", "heat", 
       "hot_water", "cold_water", "phone", "housing_service", 
       "renovation", "loan", "interest", "insurance", "waste", "other"
-    ];
+    ] as const;
     
-    const isValidType = validUtilityTypes.includes(row.utilitytype);
+    const isValidType = validUtilityTypes.includes(row.utilitytype as any);
     if (!isValidType) {
       errors.push({
         rowIndex,
@@ -99,7 +100,8 @@ export const validateRow = (row: CSVRow, rowIndex: number): ValidatedEntry => {
         message: `Invalid utility type: ${row.utilitytype}`,
       });
     } else {
-      entry.utilityType = row.utilitytype;
+      // Use type assertion to ensure the string is of the correct utility type
+      entry.utilityType = row.utilitytype as UtilityEntry["utilityType"];
     }
   }
 
