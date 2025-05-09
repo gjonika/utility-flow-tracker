@@ -71,6 +71,8 @@ export type Database = {
           created_at: string
           id: string
           notes: string | null
+          payment_date: string | null
+          payment_reference: string | null
           reading: number | null
           readingdate: string
           supplier: string
@@ -83,6 +85,8 @@ export type Database = {
           created_at?: string
           id?: string
           notes?: string | null
+          payment_date?: string | null
+          payment_reference?: string | null
           reading?: number | null
           readingdate: string
           supplier: string
@@ -95,6 +99,8 @@ export type Database = {
           created_at?: string
           id?: string
           notes?: string | null
+          payment_date?: string | null
+          payment_reference?: string | null
           reading?: number | null
           readingdate?: string
           supplier?: string
@@ -109,6 +115,7 @@ export type Database = {
           created_at: string
           id: string
           name: string
+          requires_reading: boolean | null
           unit: string | null
           utilitytype: string
         }
@@ -116,6 +123,7 @@ export type Database = {
           created_at?: string
           id?: string
           name: string
+          requires_reading?: boolean | null
           unit?: string | null
           utilitytype: string
         }
@@ -123,6 +131,7 @@ export type Database = {
           created_at?: string
           id?: string
           name?: string
+          requires_reading?: boolean | null
           unit?: string | null
           utilitytype?: string
         }

@@ -1,11 +1,11 @@
 
 import { z } from "zod";
 
-export type UtilityType = "electricity" | "water" | "gas" | "internet" | "other";
+export type UtilityType = "electricity" | "water" | "gas" | "internet" | "heat" | "hot_water" | "cold_water" | "phone" | "housing_service" | "renovation" | "loan" | "interest" | "insurance" | "waste" | "other";
 
 export const UtilityEntrySchema = z.object({
   id: z.string().uuid().optional(),
-  utilityType: z.enum(["electricity", "water", "gas", "internet", "other"]),
+  utilityType: z.enum(["electricity", "water", "gas", "internet", "heat", "hot_water", "cold_water", "phone", "housing_service", "renovation", "loan", "interest", "insurance", "waste", "other"]),
   supplier: z.string().min(1, "Supplier name is required"),
   readingDate: z.string(),
   reading: z.number().nullable().optional(),
@@ -15,6 +15,8 @@ export const UtilityEntrySchema = z.object({
   synced: z.boolean().default(true),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
+  paymentDate: z.string().nullable().optional(),
+  paymentReference: z.string().nullable().optional()
 });
 
 export type UtilityEntry = z.infer<typeof UtilityEntrySchema>;
@@ -33,4 +35,5 @@ export type UtilitySupplier = {
   utilityType: UtilityType;
   name: string;
   unit?: string;
+  requiresReading?: boolean;
 };

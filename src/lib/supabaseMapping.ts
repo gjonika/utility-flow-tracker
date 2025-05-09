@@ -1,5 +1,5 @@
 
-import { UtilityEntry } from './types';
+import { UtilityEntry, UtilitySupplier } from './types';
 
 /**
  * Mapping utilities for Supabase data
@@ -17,7 +17,9 @@ export const mapToSupabaseModel = (entry: UtilityEntry) => {
     amount: entry.amount,
     notes: entry.notes,
     created_at: entry.createdAt,
-    updated_at: entry.updatedAt
+    updated_at: entry.updatedAt,
+    payment_date: entry.paymentDate,
+    payment_reference: entry.paymentReference
   };
 };
 
@@ -34,6 +36,19 @@ export const mapFromSupabaseModel = (record: any): UtilityEntry => {
     notes: record.notes,
     createdAt: record.created_at,
     updatedAt: record.updated_at,
-    synced: true
+    synced: true,
+    paymentDate: record.payment_date,
+    paymentReference: record.payment_reference
+  };
+};
+
+// Map from Supabase supplier model to our app model
+export const mapFromSupabaseSupplierModel = (record: any): UtilitySupplier => {
+  return {
+    id: record.id,
+    utilityType: record.utilitytype,
+    name: record.name,
+    unit: record.unit,
+    requiresReading: record.requires_reading
   };
 };
