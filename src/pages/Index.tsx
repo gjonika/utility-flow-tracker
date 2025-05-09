@@ -25,6 +25,9 @@ const Index = () => {
   const [showCharts, setShowCharts] = useState(false);
   const [chartEntries, setChartEntries] = useState<UtilityEntry[]>([]);
 
+  // Featured utility types to show in the dashboard cards
+  const featuredUtilityTypes = ["electricity", "water", "gas", "internet"];
+
   useEffect(() => {
     // Setup network listeners for offline/online handling
     setupUtilityNetworkListeners();
@@ -81,7 +84,7 @@ const Index = () => {
           
           <TabsContent value="dashboard" className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {["electricity", "water", "gas", "internet"].map((utilityType) => {
+              {featuredUtilityTypes.map((utilityType) => {
                 const typeEntries = entries.filter(entry => entry.utilityType === utilityType);
                 const latestEntry = typeEntries.length > 0 
                   ? typeEntries.reduce((latest, entry) => 

@@ -40,6 +40,16 @@ type ChartData = {
   water?: number;
   gas?: number;
   internet?: number;
+  heat?: number;
+  hot_water?: number;
+  cold_water?: number;
+  phone?: number;
+  housing_service?: number;
+  renovation?: number;
+  loan?: number;
+  interest?: number;
+  insurance?: number;
+  waste?: number;
   other?: number;
   [key: string]: any;
 };
@@ -56,7 +66,17 @@ export function UtilityChart({ entries }: UtilityChartProps) {
     water: "#4CC9F0",
     gas: "#F72585",
     internet: "#7209B7",
-    other: "#3A86FF"
+    heat: "#FF9E00",
+    hot_water: "#48CAE4",
+    cold_water: "#90E0EF",
+    phone: "#9D4EDD",
+    housing_service: "#ADB5BD",
+    renovation: "#FF006E",
+    loan: "#8338EC",
+    interest: "#3A86FF",
+    insurance: "#FB8500",
+    waste: "#38B000",
+    other: "#6C757D"
   };
 
   // Process data for charts
@@ -213,6 +233,16 @@ export function UtilityChart({ entries }: UtilityChartProps) {
                 <SelectItem value="water">Water</SelectItem>
                 <SelectItem value="gas">Gas</SelectItem>
                 <SelectItem value="internet">Internet</SelectItem>
+                <SelectItem value="heat">Heat</SelectItem>
+                <SelectItem value="hot_water">Hot Water</SelectItem>
+                <SelectItem value="cold_water">Cold Water</SelectItem>
+                <SelectItem value="phone">Phone</SelectItem>
+                <SelectItem value="housing_service">Housing Service</SelectItem>
+                <SelectItem value="renovation">Renovation</SelectItem>
+                <SelectItem value="loan">Loan</SelectItem>
+                <SelectItem value="interest">Interest</SelectItem>
+                <SelectItem value="insurance">Insurance</SelectItem>
+                <SelectItem value="waste">Waste</SelectItem>
                 <SelectItem value="other">Other</SelectItem>
               </SelectContent>
             </Select>

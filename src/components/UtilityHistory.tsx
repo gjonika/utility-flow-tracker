@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { ChartBarIcon, EditIcon, TrashIcon } from "lucide-react";
@@ -124,6 +123,16 @@ export function UtilityHistory({ entries, onRefresh, onViewCharts }: UtilityHist
       water: "text-utility-water",
       gas: "text-utility-gas",
       internet: "text-utility-internet",
+      heat: "text-utility-heat",
+      hot_water: "text-utility-hot-water",
+      cold_water: "text-utility-cold-water",
+      phone: "text-utility-phone",
+      housing_service: "text-utility-housing",
+      renovation: "text-utility-renovation",
+      loan: "text-utility-loan",
+      interest: "text-utility-interest",
+      insurance: "text-utility-insurance",
+      waste: "text-utility-waste",
       other: "text-utility"
     };
     
@@ -136,6 +145,16 @@ export function UtilityHistory({ entries, onRefresh, onViewCharts }: UtilityHist
       water: "bg-utility-water/10",
       gas: "bg-utility-gas/10",
       internet: "bg-utility-internet/10",
+      heat: "bg-utility-heat/10",
+      hot_water: "bg-utility-hot-water/10",
+      cold_water: "bg-utility-cold-water/10",
+      phone: "bg-utility-phone/10",
+      housing_service: "bg-utility-housing/10",
+      renovation: "bg-utility-renovation/10",
+      loan: "bg-utility-loan/10",
+      interest: "bg-utility-interest/10",
+      insurance: "bg-utility-insurance/10",
+      waste: "bg-utility-waste/10",
       other: "bg-utility/10"
     };
     
@@ -185,6 +204,16 @@ export function UtilityHistory({ entries, onRefresh, onViewCharts }: UtilityHist
                   <SelectItem value="water">Water</SelectItem>
                   <SelectItem value="gas">Gas</SelectItem>
                   <SelectItem value="internet">Internet</SelectItem>
+                  <SelectItem value="heat">Heat</SelectItem>
+                  <SelectItem value="hot_water">Hot Water</SelectItem>
+                  <SelectItem value="cold_water">Cold Water</SelectItem>
+                  <SelectItem value="phone">Phone</SelectItem>
+                  <SelectItem value="housing_service">Housing Service</SelectItem>
+                  <SelectItem value="renovation">Renovation</SelectItem>
+                  <SelectItem value="loan">Loan</SelectItem>
+                  <SelectItem value="interest">Interest</SelectItem>
+                  <SelectItem value="insurance">Insurance</SelectItem>
+                  <SelectItem value="waste">Waste</SelectItem>
                   <SelectItem value="other">Other</SelectItem>
                 </SelectContent>
               </Select>
