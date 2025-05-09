@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect } from "react";
 import {
   LineChart,
@@ -71,12 +70,11 @@ export function UtilityChart({ entries }: UtilityChartProps) {
   useEffect(() => {
     const loadUtilityTypes = async () => {
       try {
-        // Get all available utility types from database
-        // Fix: Use the .eq() method correctly with a string column name
+        // Fix: Remove the .is() method and use a simpler query
         const { data, error } = await supabase
           .from('utility_entries')
           .select('utilitytype')
-          .is('utilitytype', 'not.null');
+          .not('utilitytype', 'is', null);
 
         if (error) {
           console.error('Error fetching utility types:', error);

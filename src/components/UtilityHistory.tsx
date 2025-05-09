@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { ChartBarIcon, EditIcon, TrashIcon, FileUpIcon } from "lucide-react";
@@ -70,12 +71,11 @@ export function UtilityHistory({ entries, onRefresh, onViewCharts }: UtilityHist
   useEffect(() => {
     const loadUtilityTypes = async () => {
       try {
-        // Get all available utility types from database
-        // Fix: Use the .eq() method correctly with a string column name
+        // Fix: Remove the .is() method and use a simpler query
         const { data, error } = await supabase
           .from('utility_entries')
           .select('utilitytype')
-          .is('utilitytype', 'not.null');
+          .not('utilitytype', 'is', null);
 
         if (error) {
           console.error('Error fetching utility types:', error);
