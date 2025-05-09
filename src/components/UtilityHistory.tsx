@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { ChartBarIcon, FileUpIcon } from "lucide-react";
+import { ChartBarIcon, FileUpIcon, Trash2 } from "lucide-react";
 import { 
   Card, 
   CardContent, 
@@ -24,6 +24,7 @@ import ImportModal from "./ImportModal";
 import { HistoryFilter } from "./utility/history/HistoryFilter";
 import { HistoryTable } from "./utility/history/HistoryTable";
 import { HistoryEmptyState } from "./utility/history/HistoryEmptyState";
+import { DeleteUtilitiesDialog } from "./utility/history/DeleteUtilitiesDialog";
 import { useUtilityHistory } from "./utility/history/useUtilityHistory";
 
 interface UtilityHistoryProps {
@@ -48,6 +49,7 @@ export function UtilityHistory({ entries, onRefresh, onViewCharts }: UtilityHist
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [entryToDelete, setEntryToDelete] = useState<UtilityEntry | undefined>(undefined);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [isDeleteUtilitiesOpen, setIsDeleteUtilitiesOpen] = useState(false);
 
   const handleEditEntry = (entry: UtilityEntry) => {
     setCurrentEntry(entry);
@@ -88,6 +90,10 @@ export function UtilityHistory({ entries, onRefresh, onViewCharts }: UtilityHist
     onRefresh();
   };
 
+  const handleDeleteUtilitiesComplete = () => {
+    onRefresh();
+  };
+
   const isFiltering = searchTerm !== "" || filterType !== "all";
 
   return (
@@ -99,6 +105,15 @@ export function UtilityHistory({ entries, onRefresh, onViewCharts }: UtilityHist
             <CardDescription>View and manage your utility entries</CardDescription>
           </div>
           <div className="flex flex-col md:flex-row gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setIsDeleteUtilitiesOpen(true)}
+              className="flex items-center"
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete Entries
+            </Button>
             <Button 
               variant="outline" 
               size="sm" 
@@ -193,6 +208,14 @@ export function UtilityHistory({ entries, onRefresh, onViewCharts }: UtilityHist
         isOpen={isImportModalOpen}
         onClose={() => setIsImportModalOpen(false)}
         onSuccess={handleImportSuccess}
+      />
+      
+      {/* Delete Utilities Dialog */}
+      <DeleteUtilitiesDialog 
+        isOpen={isDeleteUtilitiesOpen}
+        onClose={() => setIsDeleteUtilitiesOpen(false)}
+        onDeleteComplete={handleDeleteUtilitiesComplete}
+        entries={entries}
       />
     </>
   );

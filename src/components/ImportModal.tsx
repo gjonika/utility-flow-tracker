@@ -1,7 +1,6 @@
-
 import { useState, useRef, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
-import { X, UploadCloud, AlertCircle, Check, ArrowRight, Download } from "lucide-react";
+import { X, UploadCloud, AlertCircle, Check, ArrowRight, Download, RefreshCw } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -55,18 +54,37 @@ export function ImportModal({ isOpen, onClose, onSuccess }: ImportModalProps) {
     total: number;
   }>({ success: 0, failed: 0, total: 0 });
 
-  // Clear state when modal closes
-  const handleClose = useCallback(() => {
-    setContent(null);
-    setFileName("");
-    setActiveTab("upload");
-    setHeaderErrors([]);
-    setValidatedEntries([]);
-    setIsImporting(false);
-    setProgress(0);
-    setImportResult({ success: 0, failed: 0, total: 0 });
-    onClose();
-  }, [onClose]);
+  // Count errors
+  const errorCount = validatedEntries.reduce(
+    (count, entry) => count + entry.errors.length, 
+    0
+  );
+
+  // Get error for a specific field in a row
+  const getFieldError = (rowIndex: number, field: string): ValidationError | undefined => {
+    const entry = validatedEntries[rowIndex];
+    return entry?.errors.find(err => err.field === field);
+  };
+
+  // Type guard for UtilityEntry
+  const isValidUtilityEntry = (entry: Partial<UtilityEntry>): boolean => {
+    return Boolean(
+      entry.utilityType &&
+      entry.supplier &&
+      entry.readingDate &&
+      typeof entry.amount === 'number'
+    );
+  };
+
+  // Download sample CSV
+  const handleDownloadSample = () => {
+    const link = document.createElement("a");
+    link.href = "/sample-import.csv";
+    link.download = "utility-import-sample.csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   // Handle file drop
   const onDrop = useCallback((acceptedFiles: File[]) => {
@@ -103,18 +121,6 @@ export function ImportModal({ isOpen, onClose, onSuccess }: ImportModalProps) {
     maxFiles: 1,
   });
 
-  // Count errors
-  const errorCount = validatedEntries.reduce(
-    (count, entry) => count + entry.errors.length, 
-    0
-  );
-
-  // Get error for a specific field in a row
-  const getFieldError = (rowIndex: number, field: string): ValidationError | undefined => {
-    const entry = validatedEntries[rowIndex];
-    return entry?.errors.find(err => err.field === field);
-  };
-
   // Handle import button click
   const handleImport = async () => {
     const validEntries = validatedEntries.filter(ve => ve.errors.length === 0);
@@ -136,7 +142,7 @@ export function ImportModal({ isOpen, onClose, onSuccess }: ImportModalProps) {
       
       try {
         if (isValidUtilityEntry(entry)) {
-          // Ensure we log any errors in saving
+          // Make sure to properly map the entry to Supabase model before saving
           const savedEntry = await utilityService.saveEntry(entry as UtilityEntry);
           if (savedEntry) {
             success++;
@@ -163,8 +169,7 @@ export function ImportModal({ isOpen, onClose, onSuccess }: ImportModalProps) {
     
     if (success > 0) {
       toast.success(`Successfully imported ${success} entries`);
-      // Ensure we call onSuccess to refresh the data in the parent component
-      onSuccess();
+      // Make sure we trigger the onSuccess callback properly
     }
     
     if (failed > 0) {
@@ -172,24 +177,23 @@ export function ImportModal({ isOpen, onClose, onSuccess }: ImportModalProps) {
     }
   };
   
-  // Type guard for UtilityEntry
-  const isValidUtilityEntry = (entry: Partial<UtilityEntry>): boolean => {
-    return Boolean(
-      entry.utilityType &&
-      entry.supplier &&
-      entry.readingDate &&
-      typeof entry.amount === 'number'
-    );
-  };
+  // Clear state when modal closes
+  const handleClose = useCallback(() => {
+    setContent(null);
+    setFileName("");
+    setActiveTab("upload");
+    setHeaderErrors([]);
+    setValidatedEntries([]);
+    setIsImporting(false);
+    setProgress(0);
+    setImportResult({ success: 0, failed: 0, total: 0 });
+    onClose();
+  }, [onClose]);
 
-  // Download sample CSV
-  const handleDownloadSample = () => {
-    const link = document.createElement("a");
-    link.href = "/sample-import.csv";
-    link.download = "utility-import-sample.csv";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleCloseAndRefresh = () => {
+    // Make sure to properly trigger the onSuccess callback to refresh data
+    onSuccess();
+    handleClose();
   };
 
   return (
@@ -406,7 +410,13 @@ export function ImportModal({ isOpen, onClose, onSuccess }: ImportModalProps) {
                       <div className="text-xs text-muted-foreground">Failed</div>
                     </div>
                   </div>
-                  <Button onClick={handleClose}>Close and Refresh Data</Button>
+                  <Button 
+                    onClick={handleCloseAndRefresh} 
+                    className="flex items-center"
+                  >
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Close and Refresh Data
+                  </Button>
                 </div>
               ) : (
                 <div className="space-y-4">

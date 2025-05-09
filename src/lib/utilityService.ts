@@ -162,6 +162,33 @@ export const utilityService = {
       return false;
     }
   },
+
+  // Delete all entries
+  async deleteAllEntries(): Promise<boolean> {
+    try {
+      if (isOnline()) {
+        // Delete all entries from Supabase
+        const { error } = await supabase
+          .from('utility_entries')
+          .delete()
+          .not('id', 'is', null); // This will delete all entries
+        
+        if (error) {
+          console.error('Error deleting all entries from Supabase:', error);
+          return false;
+        }
+      }
+      
+      // Clear local storage entries
+      localStorage.setItem(UTILITY_ENTRIES_KEY, JSON.stringify([]));
+      localStorage.setItem(UNSYNCED_ENTRIES_KEY, JSON.stringify([]));
+      
+      return true;
+    } catch (error) {
+      console.error('Error in deleteAllEntries:', error);
+      return false;
+    }
+  },
   
   // Get unsynced entries
   getUnsyncedEntries(): UtilityEntry[] {
