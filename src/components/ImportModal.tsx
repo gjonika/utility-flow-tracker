@@ -136,10 +136,17 @@ export function ImportModal({ isOpen, onClose, onSuccess }: ImportModalProps) {
       
       try {
         if (isValidUtilityEntry(entry)) {
-          await utilityService.saveEntry(entry as UtilityEntry);
-          success++;
+          // Ensure we log any errors in saving
+          const savedEntry = await utilityService.saveEntry(entry as UtilityEntry);
+          if (savedEntry) {
+            success++;
+          } else {
+            failed++;
+            console.error("Failed to save entry:", entry);
+          }
         } else {
           failed++;
+          console.error("Invalid entry format:", entry);
         }
       } catch (error) {
         console.error("Error importing entry:", error);
@@ -156,6 +163,7 @@ export function ImportModal({ isOpen, onClose, onSuccess }: ImportModalProps) {
     
     if (success > 0) {
       toast.success(`Successfully imported ${success} entries`);
+      // Ensure we call onSuccess to refresh the data in the parent component
       onSuccess();
     }
     

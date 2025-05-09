@@ -1,7 +1,6 @@
 
-import { useState, useEffect } from "react";
-import { format } from "date-fns";
-import { ChartBarIcon, EditIcon, TrashIcon, FileUpIcon } from "lucide-react";
+import { useState } from "react";
+import { ChartBarIcon, FileUpIcon } from "lucide-react";
 import { 
   Card, 
   CardContent, 
@@ -9,14 +8,6 @@ import {
   CardTitle, 
   CardDescription 
 } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -25,26 +16,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { UtilityEntry } from "@/lib/types";
 import { utilityService } from "@/lib/supabase";
-import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import UtilityForm from "./UtilityForm";
 import ImportModal from "./ImportModal";
-import { toast } from "sonner";
+import { HistoryFilter } from "./utility/history/HistoryFilter";
+import { HistoryTable } from "./utility/history/HistoryTable";
+import { HistoryEmptyState } from "./utility/history/HistoryEmptyState";
+import { useUtilityHistory } from "./utility/history/useUtilityHistory";
 
 interface UtilityHistoryProps {
   entries: UtilityEntry[];
@@ -53,65 +33,21 @@ interface UtilityHistoryProps {
 }
 
 export function UtilityHistory({ entries, onRefresh, onViewCharts }: UtilityHistoryProps) {
-  const [filteredEntries, setFilteredEntries] = useState<UtilityEntry[]>(entries);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterType, setFilterType] = useState<string>("all");
+  const {
+    filteredEntries,
+    searchTerm,
+    setSearchTerm,
+    filterType,
+    setFilterType,
+    availableUtilityTypes,
+    colorScheme
+  } = useUtilityHistory(entries);
+  
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [currentEntry, setCurrentEntry] = useState<UtilityEntry | undefined>(undefined);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [entryToDelete, setEntryToDelete] = useState<UtilityEntry | undefined>(undefined);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-  const [availableUtilityTypes, setAvailableUtilityTypes] = useState<string[]>([]);
-
-  useEffect(() => {
-    filterEntries(entries, searchTerm, filterType);
-  }, [entries, searchTerm, filterType]);
-
-  // Load utility types from Supabase
-  useEffect(() => {
-    const loadUtilityTypes = async () => {
-      try {
-        // Fix: Remove the .is() method and use a simpler query
-        const { data, error } = await supabase
-          .from('utility_entries')
-          .select('utilitytype')
-          .not('utilitytype', 'is', null);
-
-        if (error) {
-          console.error('Error fetching utility types:', error);
-          return;
-        }
-
-        // Extract unique utility types
-        const uniqueTypes = [...new Set(data.map(item => item.utilitytype))];
-        setAvailableUtilityTypes(uniqueTypes);
-      } catch (error) {
-        console.error('Error loading utility types:', error);
-      }
-    };
-
-    loadUtilityTypes();
-  }, []);
-
-  const filterEntries = (entries: UtilityEntry[], term: string, type: string) => {
-    let filtered = [...entries];
-    
-    // Filter by utility type
-    if (type !== "all") {
-      filtered = filtered.filter(entry => entry.utilityType === type);
-    }
-    
-    // Filter by search term
-    if (term.trim()) {
-      const lowercaseTerm = term.toLowerCase();
-      filtered = filtered.filter(entry => 
-        entry.supplier.toLowerCase().includes(lowercaseTerm) ||
-        (entry.notes && entry.notes.toLowerCase().includes(lowercaseTerm))
-      );
-    }
-    
-    setFilteredEntries(filtered);
-  };
 
   const handleEditEntry = (entry: UtilityEntry) => {
     setCurrentEntry(entry);
@@ -152,51 +88,7 @@ export function UtilityHistory({ entries, onRefresh, onViewCharts }: UtilityHist
     onRefresh();
   };
 
-  // Default utility colors - will be supplemented with dynamically loaded types
-  const defaultColors: Record<string, string> = {
-    electricity: "text-utility-electricity",
-    water: "text-utility-water",
-    gas: "text-utility-gas",
-    internet: "text-utility-internet",
-    heat: "text-utility-heat",
-    hot_water: "text-utility-hot-water",
-    cold_water: "text-utility-cold-water",
-    phone: "text-utility-phone",
-    housing_service: "text-utility-housing",
-    renovation: "text-utility-renovation", 
-    loan: "text-utility-loan",
-    interest: "text-utility-interest",
-    insurance: "text-utility-insurance",
-    waste: "text-utility-waste",
-    other: "text-utility"
-  };
-
-  const getUtilityColor = (type: string): string => {
-    return defaultColors[type] || "text-primary";
-  };
-
-  // Default utility background colors
-  const defaultBgColors: Record<string, string> = {
-    electricity: "bg-utility-electricity/10",
-    water: "bg-utility-water/10",
-    gas: "bg-utility-gas/10",
-    internet: "bg-utility-internet/10",
-    heat: "bg-utility-heat/10",
-    hot_water: "bg-utility-hot-water/10",
-    cold_water: "bg-utility-cold-water/10",
-    phone: "bg-utility-phone/10",
-    housing_service: "bg-utility-housing/10",
-    renovation: "bg-utility-renovation/10",
-    loan: "bg-utility-loan/10",
-    interest: "bg-utility-interest/10",
-    insurance: "bg-utility-insurance/10",
-    waste: "bg-utility-waste/10",
-    other: "bg-utility/10"
-  };
-
-  const getUtilityBgColor = (type: string): string => {
-    return defaultBgColors[type] || "bg-primary/10";
-  };
+  const isFiltering = searchTerm !== "" || filterType !== "all";
 
   return (
     <>
@@ -228,97 +120,23 @@ export function UtilityHistory({ entries, onRefresh, onViewCharts }: UtilityHist
           </div>
         </CardHeader>
         <CardContent>
-          <div className="mb-4 flex flex-col md:flex-row gap-2">
-            <div className="flex-1">
-              <Input 
-                placeholder="Search suppliers or notes..." 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <div className="w-full md:w-48">
-              <Select 
-                value={filterType} 
-                onValueChange={setFilterType}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Filter by type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  {availableUtilityTypes.map(type => (
-                    <SelectItem key={type} value={type}>
-                      {type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ')}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          <HistoryFilter 
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            filterType={filterType}
+            setFilterType={setFilterType}
+            availableUtilityTypes={availableUtilityTypes}
+          />
           
           {filteredEntries.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              {searchTerm || filterType !== "all" 
-                ? "No entries match your search criteria" 
-                : "No utility entries found. Add your first entry!"}
-            </div>
+            <HistoryEmptyState isFiltering={isFiltering} />
           ) : (
-            <div className="rounded-md border overflow-auto max-h-[32rem]">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Supplier</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Reading</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredEntries.map((entry) => (
-                    <TableRow key={entry.id}>
-                      <TableCell>
-                        <div className={`${getUtilityBgColor(entry.utilityType)} ${getUtilityColor(entry.utilityType)} inline-flex items-center rounded-full px-2 py-1 text-xs font-medium`}>
-                          {entry.utilityType.charAt(0).toUpperCase() + entry.utilityType.slice(1).replace('_', ' ')}
-                        </div>
-                      </TableCell>
-                      <TableCell className="font-medium">{entry.supplier}</TableCell>
-                      <TableCell>
-                        {format(new Date(entry.readingDate), "MMM d, yyyy")}
-                        {!entry.synced && <span className="ml-2 text-xs text-yellow-500">(not synced)</span>}
-                      </TableCell>
-                      <TableCell>
-                        {entry.reading !== null ? `${entry.reading} ${entry.unit || ''}` : "—"}
-                      </TableCell>
-                      <TableCell>${entry.amount.toFixed(2)}</TableCell>
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              ...
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleEditEntry(entry)}>
-                              <EditIcon className="mr-2 h-4 w-4" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              className="text-destructive focus:text-destructive"
-                              onClick={() => confirmDelete(entry)}
-                            >
-                              <TrashIcon className="mr-2 h-4 w-4" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+            <HistoryTable 
+              entries={filteredEntries}
+              colorScheme={colorScheme}
+              onEditEntry={handleEditEntry}
+              onDeleteEntry={confirmDelete}
+            />
           )}
           
           <div className="mt-2 text-xs text-muted-foreground">

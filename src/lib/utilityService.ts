@@ -48,7 +48,7 @@ export const utilityService = {
   },
   
   // Save an entry to Supabase and/or localStorage
-  async saveEntry(entry: UtilityEntry): Promise<UtilityEntry> {
+  async saveEntry(entry: UtilityEntry): Promise<UtilityEntry | null> {
     try {
       const now = new Date().toISOString();
       const entryToSave = {
@@ -60,6 +60,8 @@ export const utilityService = {
       if (isOnline()) {
         // Map to Supabase model before saving
         const supabaseEntry = mapToSupabaseModel(entryToSave);
+        
+        console.log("Saving to Supabase:", supabaseEntry);
         
         // Try to save to Supabase first
         const { data, error } = await supabase

@@ -7,7 +7,8 @@ import { UtilityEntry, UtilitySupplier } from './types';
 
 // Map our app model to Supabase schema
 export const mapToSupabaseModel = (entry: UtilityEntry) => {
-  return {
+  // Make sure we're explicitly mapping each field
+  const mapped = {
     id: entry.id,
     utilitytype: entry.utilityType,
     supplier: entry.supplier,
@@ -21,6 +22,9 @@ export const mapToSupabaseModel = (entry: UtilityEntry) => {
     payment_date: entry.paymentDate,
     payment_reference: entry.paymentReference
   };
+  
+  console.log("Mapped to Supabase model:", mapped);
+  return mapped;
 };
 
 // Map from Supabase model to our app model

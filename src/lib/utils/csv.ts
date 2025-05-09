@@ -1,4 +1,3 @@
-
 import { UtilityEntry } from "../types";
 import { parse } from "date-fns";
 
@@ -85,7 +84,7 @@ export const validateRow = (row: CSVRow, rowIndex: number): ValidatedEntry => {
       message: "Utility type is required",
     });
   } else {
-    // Fix: Check if utility type is valid without using UtilityType as a value
+    // Define valid utility types as a string array
     const validUtilityTypes = [
       "electricity", "water", "gas", "internet", "heat", 
       "hot_water", "cold_water", "phone", "housing_service", 
@@ -100,7 +99,7 @@ export const validateRow = (row: CSVRow, rowIndex: number): ValidatedEntry => {
         message: `Invalid utility type: ${row.utilitytype}`,
       });
     } else {
-      entry.utilityType = row.utilitytype as any;
+      entry.utilityType = row.utilitytype;
     }
   }
 
