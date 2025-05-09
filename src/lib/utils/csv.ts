@@ -1,5 +1,5 @@
 
-import { UtilityEntry, UtilityType } from "../types";
+import { UtilityEntry } from "../types";
 import { parse } from "date-fns";
 
 // Expected headers for the CSV file
@@ -85,7 +85,14 @@ export const validateRow = (row: CSVRow, rowIndex: number): ValidatedEntry => {
       message: "Utility type is required",
     });
   } else {
-    const isValidType = Object.values(UtilityType).includes(row.utilitytype as UtilityType);
+    // Fix: Check if utility type is valid without using UtilityType as a value
+    const validUtilityTypes = [
+      "electricity", "water", "gas", "internet", "heat", 
+      "hot_water", "cold_water", "phone", "housing_service", 
+      "renovation", "loan", "interest", "insurance", "waste", "other"
+    ];
+    
+    const isValidType = validUtilityTypes.includes(row.utilitytype);
     if (!isValidType) {
       errors.push({
         rowIndex,
@@ -93,7 +100,7 @@ export const validateRow = (row: CSVRow, rowIndex: number): ValidatedEntry => {
         message: `Invalid utility type: ${row.utilitytype}`,
       });
     } else {
-      entry.utilityType = row.utilitytype as UtilityType;
+      entry.utilityType = row.utilitytype as any;
     }
   }
 

@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
-import { UtilityEntry, UtilityType } from "@/lib/types";
+import { UtilityEntry } from "@/lib/types";
 
 interface UtilityChartProps {
   entries: UtilityEntry[];
@@ -72,10 +72,10 @@ export function UtilityChart({ entries }: UtilityChartProps) {
     const loadUtilityTypes = async () => {
       try {
         // Get all available utility types from database
+        // Fix: Use the .eq() method correctly with a string column name
         const { data, error } = await supabase
           .from('utility_entries')
           .select('utilitytype')
-          .order('utilitytype')
           .is('utilitytype', 'not.null');
 
         if (error) {
