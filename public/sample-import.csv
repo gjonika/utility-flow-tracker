@@ -1,0 +1,9 @@
+
+utilitytype,supplier,readingdate,reading,unit,amount,notes
+electricity,Power Co.,2023-01-15,450,kWh,78.50,Monthly bill
+water,Water Services,2023-01-20,12.5,m³,35.20,Quarterly bill
+gas,Gas Company,2023-01-25,67,m³,92.15,Monthly heating
+internet,ISP Provider,2023-02-01,,Mbps,59.99,Monthly subscription
+electricity,Power Co.,2023-02-15,520,kWh,85.30,Monthly bill
+water,Water Services,2023-04-20,14.2,m³,40.50,Quarterly bill
+gas,Gas Company,2023-02-25,73,m³,99.40,Monthly heating

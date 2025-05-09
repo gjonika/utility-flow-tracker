@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   LineChart,
   Line,
@@ -12,7 +12,7 @@ import {
   Legend,
   ResponsiveContainer
 } from "recharts";
-import { format, parseISO, startOfMonth, getMonth, getYear } from "date-fns";
+import { format, parseISO, startOfMonth } from "date-fns";
 import { 
   Card, 
   CardContent, 
@@ -28,6 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { supabase } from "@/integrations/supabase/client";
 import { UtilityEntry, UtilityType } from "@/lib/types";
 
 interface UtilityChartProps {
@@ -36,22 +37,26 @@ interface UtilityChartProps {
 
 type ChartData = {
   date: string;
-  electricity?: number;
-  water?: number;
-  gas?: number;
-  internet?: number;
-  heat?: number;
-  hot_water?: number;
-  cold_water?: number;
-  phone?: number;
-  housing_service?: number;
-  renovation?: number;
-  loan?: number;
-  interest?: number;
-  insurance?: number;
-  waste?: number;
-  other?: number;
   [key: string]: any;
+};
+
+// Default utility colors - will be supplemented with dynamically loaded types
+const defaultColors: Record<string, string> = {
+  electricity: "#4361EE",
+  water: "#4CC9F0",
+  gas: "#F72585",
+  internet: "#7209B7",
+  heat: "#FF9E00",
+  hot_water: "#48CAE4",
+  cold_water: "#90E0EF",
+  phone: "#9D4EDD",
+  housing_service: "#ADB5BD",
+  renovation: "#FF006E",
+  loan: "#8338EC",
+  interest: "#3A86FF",
+  insurance: "#FB8500",
+  waste: "#38B000",
+  other: "#6C757D"
 };
 
 export function UtilityChart({ entries }: UtilityChartProps) {
@@ -59,25 +64,44 @@ export function UtilityChart({ entries }: UtilityChartProps) {
   const [chartType, setChartType] = useState<'line' | 'bar'>('line');
   const [timeRange, setTimeRange] = useState<string>("12");
   const [filterType, setFilterType] = useState<string>("all");
+  const [availableUtilityTypes, setAvailableUtilityTypes] = useState<string[]>([]);
+  const [utilityColors, setUtilityColors] = useState<Record<string, string>>(defaultColors);
 
-  // Colors for different utilities
-  const colors: Record<UtilityType, string> = {
-    electricity: "#4361EE",
-    water: "#4CC9F0",
-    gas: "#F72585",
-    internet: "#7209B7",
-    heat: "#FF9E00",
-    hot_water: "#48CAE4",
-    cold_water: "#90E0EF",
-    phone: "#9D4EDD",
-    housing_service: "#ADB5BD",
-    renovation: "#FF006E",
-    loan: "#8338EC",
-    interest: "#3A86FF",
-    insurance: "#FB8500",
-    waste: "#38B000",
-    other: "#6C757D"
-  };
+  // Load utility types from Supabase
+  useEffect(() => {
+    const loadUtilityTypes = async () => {
+      try {
+        // Get all available utility types from database
+        const { data, error } = await supabase
+          .from('utility_entries')
+          .select('utilitytype')
+          .order('utilitytype')
+          .is('utilitytype', 'not.null');
+
+        if (error) {
+          console.error('Error fetching utility types:', error);
+          return;
+        }
+
+        // Extract unique utility types
+        const uniqueTypes = [...new Set(data.map(item => item.utilitytype))];
+        setAvailableUtilityTypes(uniqueTypes);
+
+        // Generate colors for any utility types not in defaultColors
+        const newColors = { ...utilityColors };
+        uniqueTypes.forEach(type => {
+          if (!newColors[type]) {
+            newColors[type] = "#6C757D"; // Default gray for unknown types
+          }
+        });
+        setUtilityColors(newColors);
+      } catch (error) {
+        console.error('Error loading utility types:', error);
+      }
+    };
+
+    loadUtilityTypes();
+  }, []);
 
   // Process data for charts
   const chartData = useMemo(() => {
@@ -147,15 +171,15 @@ export function UtilityChart({ entries }: UtilityChartProps) {
 
   // Get active utility types in the filtered data
   const activeTypes = useMemo(() => {
-    const types = new Set<UtilityType>();
+    const types = new Set<string>();
     
     if (filterType !== "all") {
-      types.add(filterType as UtilityType);
+      types.add(filterType);
     } else {
       chartData.forEach(point => {
         Object.keys(point).forEach(key => {
-          if (colors[key as UtilityType] && point[key] !== undefined) {
-            types.add(key as UtilityType);
+          if (key !== 'date' && key !== 'month' && point[key] !== undefined) {
+            types.add(key);
           }
         });
       });
@@ -229,21 +253,11 @@ export function UtilityChart({ entries }: UtilityChartProps) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="electricity">Electricity</SelectItem>
-                <SelectItem value="water">Water</SelectItem>
-                <SelectItem value="gas">Gas</SelectItem>
-                <SelectItem value="internet">Internet</SelectItem>
-                <SelectItem value="heat">Heat</SelectItem>
-                <SelectItem value="hot_water">Hot Water</SelectItem>
-                <SelectItem value="cold_water">Cold Water</SelectItem>
-                <SelectItem value="phone">Phone</SelectItem>
-                <SelectItem value="housing_service">Housing Service</SelectItem>
-                <SelectItem value="renovation">Renovation</SelectItem>
-                <SelectItem value="loan">Loan</SelectItem>
-                <SelectItem value="interest">Interest</SelectItem>
-                <SelectItem value="insurance">Insurance</SelectItem>
-                <SelectItem value="waste">Waste</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
+                {availableUtilityTypes.map(type => (
+                  <SelectItem key={type} value={type}>
+                    {type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ')}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -283,7 +297,7 @@ export function UtilityChart({ entries }: UtilityChartProps) {
                           type="monotone"
                           dataKey={type}
                           name={type}
-                          stroke={colors[type]}
+                          stroke={utilityColors[type] || "#6C757D"}
                           activeDot={{ r: 6 }}
                           strokeWidth={2}
                         />
@@ -307,7 +321,7 @@ export function UtilityChart({ entries }: UtilityChartProps) {
                           key={type}
                           dataKey={type}
                           name={type}
-                          fill={colors[type]}
+                          fill={utilityColors[type] || "#6C757D"}
                         />
                       ))}
                     </BarChart>
@@ -344,7 +358,7 @@ export function UtilityChart({ entries }: UtilityChartProps) {
                           type="monotone"
                           dataKey={type}
                           name={type}
-                          stroke={colors[type]}
+                          stroke={utilityColors[type] || "#6C757D"}
                           activeDot={{ r: 6 }}
                           strokeWidth={2}
                         />
@@ -368,7 +382,7 @@ export function UtilityChart({ entries }: UtilityChartProps) {
                           key={type}
                           dataKey={type}
                           name={type}
-                          fill={colors[type]}
+                          fill={utilityColors[type] || "#6C757D"}
                         />
                       ))}
                     </BarChart>

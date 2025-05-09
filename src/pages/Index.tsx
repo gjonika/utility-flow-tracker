@@ -10,9 +10,11 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { FileUpIcon } from "lucide-react";
 import { UtilityForm } from "@/components/UtilityForm";
 import { UtilityHistory } from "@/components/UtilityHistory";
 import { UtilityChart } from "@/components/UtilityChart";
+import { ImportModal } from "@/components/ImportModal";
 import { utilityService, setupUtilityNetworkListeners } from "@/lib/supabase";
 import { UtilityEntry } from "@/lib/types";
 import { toast } from "sonner";
@@ -24,6 +26,7 @@ const Index = () => {
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
   const [showCharts, setShowCharts] = useState(false);
   const [chartEntries, setChartEntries] = useState<UtilityEntry[]>([]);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   // Featured utility types to show in the dashboard cards
   const featuredUtilityTypes = ["electricity", "water", "gas", "internet"];
@@ -59,6 +62,11 @@ const Index = () => {
     setShowCharts(true);
   };
 
+  const handleImportSuccess = () => {
+    loadEntries();
+    setIsImportModalOpen(false);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -69,7 +77,15 @@ const Index = () => {
               Track your utility usage and payments
             </p>
           </div>
-          <div className="mt-4 md:mt-0">
+          <div className="mt-4 md:mt-0 flex flex-col sm:flex-row gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => setIsImportModalOpen(true)}
+              className="flex items-center"
+            >
+              <FileUpIcon className="mr-2 h-4 w-4" />
+              Import CSV
+            </Button>
             <Button onClick={() => setIsAddFormOpen(true)}>
               Add New Entry
             </Button>
@@ -194,6 +210,13 @@ const Index = () => {
           <UtilityChart entries={chartEntries} />
         </DialogContent>
       </Dialog>
+      
+      {/* Import CSV Modal */}
+      <ImportModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        onSuccess={handleImportSuccess}
+      />
     </div>
   );
 };
